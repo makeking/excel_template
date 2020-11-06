@@ -27,6 +27,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+//    dexOptions {
+//        javaMaxHeapSize "4g"
+//        jumboMode = true
+//    }
 
 //    packagingOptions {
 //        exclude 'lib/armeabi/xxx.so'
@@ -58,7 +62,7 @@ dependencies {
     implementation(group: 'com.deepoove', name: 'poi-tl', version: '1.5.0'){
         exclude group :'org.apache.xmlbeans', module:'xmlbeans'
     }
-    implementation 'com.tom_roush:pdfbox-android:1.8.10.1'
+//    implementation 'com.tom_roush:pdfbox-android:1.8.10.1'
 
 //    implementation 'com.github.kevin-wang001:poi-el:2.0.1'
 

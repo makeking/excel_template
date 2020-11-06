@@ -6,14 +6,34 @@ import android.util.Log;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.charts.AxisCrosses;
+import org.apache.poi.ss.usermodel.charts.AxisPosition;
+import org.apache.poi.ss.usermodel.charts.ChartDataSource;
+import org.apache.poi.ss.usermodel.charts.DataSources;
+import org.apache.poi.ss.usermodel.charts.LegendPosition;
+import org.apache.poi.ss.usermodel.charts.LineChartData;
+import org.apache.poi.ss.usermodel.charts.LineChartSeries;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.charts.XSSFCategoryAxis;
+import org.apache.poi.xssf.usermodel.charts.XSSFChartAxis;
+import org.apache.poi.xssf.usermodel.charts.XSSFChartLegend;
+import org.apache.poi.xssf.usermodel.charts.XSSFValueAxis;
+import org.apache.xmlbeans.XmlString;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTChart;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTLineChart;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTLineSer;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumDataSource;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumRef;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -67,8 +87,8 @@ public class PoiUtils {
     int insertRowNum = 0;
     int endNum = 0;
     int nums = 0;
-    int mergeRow = 0;
-    int mergeColumn = 0;
+    int mergeRow = 1;
+    int mergeColumn = 1;
     XSSFCellStyle rowStyle = null;
 
     public PoiUtils writeTab(Map<String, Object[]> data, Class clazz, String check, Map<String, ArrayList<String>> imageMap, String
@@ -89,6 +109,62 @@ public class PoiUtils {
             Log.e("tag", "合并单元格有  " + rangeList.size() + "个");
             int lastRowNum = sheet.getLastRowNum();
             Log.e("tag", "lastRowNum " + lastRowNum);
+            // 1. 获取所有的折线图
+            XSSFDrawing drawingPatriarch = sheet.getDrawingPatriarch();
+            List<XSSFChart> charts = drawingPatriarch.getCharts();
+            // todo 先模拟第一个折线图
+            XSSFChart xssfChart = charts.get(0);
+            CTChart ctChart = xssfChart.getCTChart();
+            CTPlotArea plotArea = ctChart.getPlotArea();
+            CTLineSer[] serArray = plotArea.getLineChartArray(0).getSerArray();
+            // todo Android use this method can throw excetion
+//            List<CTLineSer> serList = lineChartArray.getSerList();
+
+            String f = serArray[0].getVal().getNumRef().getF();
+            Log.e("tag", "第一列列数区间为 " + f);
+            // 获取行数区间
+            String val = serArray[0].getCat().getNumRef().getF();
+            Log.e("tag", "formatCode " + val);
+
+
+//            //sheet1表示操作的sheet
+//            XSSFDrawing drawingPatriarch = sheet1.getDrawingPatriarch();
+//            List<XSSFChart> charts = drawingPatriarch.getCharts();
+//            XSSFChart xssfChart = charts.get(0);
+//            CTChart ctChart = xssfChart.getCTChart();
+//            CTPlotArea plotArea = ctChart.getPlotArea();
+//            //dataRangeMaxValue 代表取值范围单元格行数最大值
+//            Integer dataRangeMaxValue = 9;
+//            List<CTRadarSer> serList = plotArea.getRadarChartArray(0).getSerList();
+//            //serList1.get(0).getVal().getNumRef().getF() -> 'TestChart1'!$E$4:$E$9
+//            //serList1.get(1).getVal().getNumRef().getF() -> 'TestChart1'!$F$4:$F$9
+//            //设置第一列取数区间
+//            serList.get(0).getVal().getNumRef().setF("'TestChart1'!$E$4:$E$" + dataRangeMaxValue);
+//            //设置第二列取数区间
+//            serList.get(1).getVal().getNumRef().setF("'TestChart1'!$F$4:$F$" + dataRangeMaxValue);
+//            //serList1.get(1).getCat().getNumRef().getF() -> 'TestChart1'!$D$7:$D$9
+//            //注意:如果是一列标题对应多列数据,serList中都必须设置以下取数区域
+//            //设置标题取数区间
+//            serList.get(0).getCat().getNumRef().setF("'TestChart1'!$D$4:$D$" + dataRangeMaxValue);
+//            serList.get(1).getCat().getNumRef().setF("'TestChart1'!$D$4:$D$" + dataRangeMaxValue);
+
+//            // 图表图例
+//            XSSFChartLegend legend = xssfChart.getOrCreateLegend();
+//            // 设置标题的位置
+//            legend.setPosition(LegendPosition.TOP);
+//            // 获取图表数据区域
+//
+//            List<? extends XSSFChartAxis> axis = xssfChart.getAxis();
+//            for (int j = 0; j < axis.size(); j++) {
+//                XSSFChartAxis xssfChartAxis = axis.get(j);
+//                // 最小值和最大值
+//                double minimum = xssfChartAxis.getMinimum();
+//                double maximum = xssfChartAxis.getMaximum();
+//                // 设置值
+//                AxisCrosses crosses = xssfChartAxis.getCrosses();
+//                Class<AxisCrosses> declaringClass = crosses.getDeclaringClass();
+//
+//            }
             if (check == null && imagss == null) {
                 lastRowNum1 = sheet.getLastRowNum();
             }
@@ -102,11 +178,10 @@ public class PoiUtils {
 //                        Map<String, Object> combineCell = PoiCopyUtils.isCombineCell(rangeList, cell);
 //                        if ((Boolean) combineCell.get("flag")) {
 //                            // 判断是否是合并单元格
-////                            Log.e("tag", "当前选中的cell有合并单元格 ");
 //                            int mergedRow = (int) combineCell.get("mergedRow");
 //                            int mergedCol = (int) combineCell.get("mergedCol");
-//                            Log.e("tag"," mergedRow =" + mergedRow + ",mergedCol = " + mergedCol );
-//                            if (mergedRow -1 > mergeRow) {
+//                            Log.e("tag", " mergedRow =" + mergedRow + ",mergedCol = " + mergedCol);
+//                            if (mergedRow > mergeRow) {
 //                                mergeRow = mergedRow;
 //                            }
 //
@@ -125,7 +200,7 @@ public class PoiUtils {
                         } else {
                             //todo  mergeRow 合并行
                             lastRowNum1 += arrayLists.size();
-                            nums = arrayLists.size() ;
+                            nums = arrayLists.size() * mergeRow;
                             endNum = arrayLists.size() + insertRowNum;
                         }
                     } catch (Exception e) {
@@ -135,7 +210,7 @@ public class PoiUtils {
                     ArrayList<String> list = imageMap.get(imagss);
                     if (list != null && !list.isEmpty()) {
                         lastRowNum1 += list.size();
-                        nums = list.size() ;
+                        nums = list.size() * mergeRow;
                         endNum = list.size() + insertRowNum;
                     } else {
                         throw new NullPointerException("Image data is null ,please check you image data!");
@@ -154,24 +229,24 @@ public class PoiUtils {
                 //  6 7
                 //  8 9
                 for (int j = insertRowNum + 1; j < endNum; j++) {
-//                    if (mergeRow>0){
-//                         int num = j * mergeRow - mergeRow;
+//                    if (mergeRow > 1) {
+//                        int num = j * mergeRow - mergeRow;
+//                        short height = sheet.getRow(insertRowNum).getHeight();
 //                        XSSFRow row1 = sheet.createRow(num);
+//                        row1.setHeight(height);
 //                        if (rowStyle != null) {
 //                            row1.setRowStyle(rowStyle);
 //                        }
-//
-//                        // 2
-//                        // 4
-//                        // 6
-//                        // 8
-//                        PoiCopyUtils.copyRow(hssfWorkbook, sheet.getRow(insertRowNum  * (j-insertRowNum)), row1, true, rangeList, sheet);
-//                    }else {
-                        XSSFRow row1 = sheet.createRow(j);
-                        if (rowStyle != null) {
-                            row1.setRowStyle(rowStyle);
-                        }
-                        PoiCopyUtils.copyRow(hssfWorkbook, sheet.getRow(insertRowNum ), row1, true, rangeList, sheet);
+//                        NewPoiCopyUtils.copyRow(hssfWorkbook, sheet.getRow(insertRowNum * (j - insertRowNum)), row1, true);
+////                        PoiCopyUtils.copyRow(hssfWorkbook, sheet.getRow(insertRowNum * (j - insertRowNum)), row1, true, rangeList, sheet);
+//                    } else {
+                    short height = sheet.getRow(insertRowNum).getHeight();
+                    XSSFRow row1 = sheet.createRow(j);
+                    row1.setHeight(height);
+                    if (rowStyle != null) {
+                        row1.setRowStyle(rowStyle);
+                    }
+                    PoiCopyUtils.copyRow(hssfWorkbook, sheet.getRow(insertRowNum), row1, true, rangeList, sheet);
 //                    }
                 }
                 // todo 设置数据
@@ -190,6 +265,48 @@ public class PoiUtils {
                     if (cell != null && cell.getCellComment() != null) {
                         String tag = cell.getCellComment().getString().toString();
                         Log.e("tag", "注解： 当前的行是" + j + " 当前的列是 " + k + "内容是" + tag);
+                        // 1. 先匹配是不是chart 类型
+//                        Matcher matchers = Pattern.compile(Constants.NEW_POI_FOREACH_START_REGEXP).matcher(tag);
+//                        if (matchers.find()) {
+//                            String newType = Objects.requireNonNull(matchers.group(1)).trim();
+//                            if ("chart".equals(newType)) {
+//                                // 设置数据
+//                                // 判断list
+//                                String dataLists = Objects.requireNonNull(matchers.group(2)).trim();
+//                                // 判断row
+//                                String rowName = Objects.requireNonNull(matchers.group(3)).trim();
+//                                // 判断 cell
+//                                String cellName = Objects.requireNonNull(matchers.group(4)).trim();
+//                                for (String key : data.keySet()) {
+//                                    if (dataLists.equals(key)) {
+//                                        // 获取数据
+//                                        Object[] dats = data.get(key);
+//                                        assert dats != null;
+//                                        int isList = (int) dats[0];
+//                                        if (0 == isList) {
+//                                        } else {
+//                                            // 表示传递过来的集合
+//                                            ArrayList list = (ArrayList) dats[1];
+//                                            Class clazzs = (Class) dats[2];
+//                                            Field[] fields = clazzs.getDeclaredFields();
+//                                            for (Field field : fields) {
+//                                                field.setAccessible(true); //设置属性为可访问
+//                                                String name = field.getName();//获取属性的名称
+//                                                if (rowName.equals(name)) {
+//                                                    // 设置行
+//
+//                                                } else if (cellName.equals(name)) {
+//                                                    // 设置列
+//
+//                                                }
+//                                                field.setAccessible(false);
+//
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
                         Matcher ma = Pattern.compile(Constants.NEW_POI_FOREACH_START_REGEXP).matcher(tag);
                         // todo 注意不可以使用 groupCount(),要不然会进行分组
                         if (ma.find()) {
@@ -251,7 +368,8 @@ public class PoiUtils {
         return this;
     }
 
-    private void newCheckData(Map<String, Object[]> data, Class clazz, String check, Map<String, ArrayList<String>> imageMap, String imagss, XSSFSheet sheet) {
+    private void newCheckData(Map<String, Object[]> data, Class clazz, String
+            check, Map<String, ArrayList<String>> imageMap, String imagss, XSSFSheet sheet) {
         for (int j = 0; j <= lastRowNum1; j++) {
             // 获取第i行的数据
             XSSFRow row = sheet.getRow(j);
@@ -267,7 +385,9 @@ public class PoiUtils {
         }
     }
 
-    private boolean checkData(Map<String, Object[]> data, Class clazz, String check, Map<String, ArrayList<String>> imageMap, String imagss, XSSFSheet sheet, int j, short k, XSSFCell cell) {
+    private boolean checkData(Map<String, Object[]> data, Class clazz, String
+            check, Map<String, ArrayList<String>> imageMap, String imagss, XSSFSheet sheet, int j,
+                              short k, XSSFCell cell) {
         // 进行设置数据
         if (insertRowNum != 0 && endNum != 0) {
             if (j >= insertRowNum && j < endNum) {
@@ -280,7 +400,7 @@ public class PoiUtils {
                     if (cell.getCellTypeEnum().equals(CellType.STRING)) {
                         // 进行正则匹配
                         String stringCellValue = cell.getStringCellValue().replace("\"", "").trim();
-                        Log.e("tag", "images 获取到的内容是 " + stringCellValue);
+//                        Log.e("tag", "images 获取到的内容是 " + stringCellValue);
                         Matcher ma = Pattern.compile(Constants.POI_IMG_KEY_REGEXP).matcher(stringCellValue);
                         while ( ma.find() ) {
                             Log.e("tag", "images 匹配成功的内容是 " + stringCellValue);
@@ -340,7 +460,8 @@ public class PoiUtils {
         return false;
     }
 
-    private void setTableData(Map<String, Object[]> data, Class clazz, String check, int j, XSSFCell cell) {
+    private void setTableData(Map<String, Object[]> data, Class clazz, String check,
+                              int j, XSSFCell cell) {
         if (cell != null) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {

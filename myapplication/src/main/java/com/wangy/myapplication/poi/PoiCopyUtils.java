@@ -86,7 +86,7 @@ public class PoiCopyUtils {
         while ( it.hasNext() ) {
             XSSFCell tmpCell = (XSSFCell) it.next();
             XSSFCell newCell = toRow.createCell(tmpCell.getColumnIndex());
-            Log.e("tag"," 当前的数字是 " + fromRow.getRowNum() );
+//            Log.e("tag"," 当前的数字是 " + fromRow.getRowNum() );
             copyCell(wb, tmpCell, newCell, copyValueFlag, rangeList, sheet, tmpCell.getColumnIndex(), fromRow.getRowNum());
         }
 
@@ -137,6 +137,7 @@ public class PoiCopyUtils {
                 // 10 11
 //                CellRangeAddress region = new CellRangeAddress(rowNum * mergedRow, rowNum * mergedRow +1 , 0, 0 );
 //                CellRangeAddress region = new CellRangeAddress(rowNum, rowNum + mergedRow - 1, cellNum, cellNum + mergedCol - 1);
+//                CellRangeAddress region = sheet.getMergedRegion(0);
 //                sheet.addMergedRegion(region);
             }
             XSSFCellStyle newstyle = wb.createCellStyle();
@@ -197,15 +198,17 @@ public class PoiCopyUtils {
             firstR = ca.getFirstRow();
             lastR = ca.getLastRow();
             //判断cell是否在合并区域之内，在的话返回true和合并行列数
-            if (cell.getRowIndex() >= firstR && cell.getRowIndex() <= lastR) {
-                if (cell.getColumnIndex() >= firstC && cell.getColumnIndex() <= lastC) {
-                    flag = true;
-                    mergedRow = lastR - firstR + 1;
-                    mergedCol = lastC - firstC + 1;
-                    result.put("flag", true);
-                    result.put("mergedRow", mergedRow);
-                    result.put("mergedCol", mergedCol);
-                    break;
+            if (cell!= null){
+                if (cell.getRowIndex() >= firstR && cell.getRowIndex() <= lastR) {
+                    if (cell.getColumnIndex() >= firstC && cell.getColumnIndex() <= lastC) {
+                        flag = true;
+                        mergedRow = lastR - firstR + 1;
+                        mergedCol = lastC - firstC + 1;
+                        result.put("flag", true);
+                        result.put("mergedRow", mergedRow);
+                        result.put("mergedCol", mergedCol);
+                        break;
+                    }
                 }
             }
         }

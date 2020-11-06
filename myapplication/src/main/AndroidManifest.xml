@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <activity android:name=".poi.PoiActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,9 +23,8 @@
         <activity android:name=".MainActivity"></activity> <!-- <activity android:name=".jxls.ExcelActivity"> -->
         <!--  -->
         <!-- </activity> -->
-        <activity android:name=".pdfbox.HomeActivity">
-
-        </activity>
+<!--        <activity android:name=".pdfbox.HomeActivity">-->
+<!--        </activity>-->
     </application>
 
 </manifest>
