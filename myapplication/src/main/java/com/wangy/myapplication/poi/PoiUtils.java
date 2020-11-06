@@ -89,6 +89,7 @@ public class PoiUtils {
     int nums = 0;
     int mergeRow = 1;
     int mergeColumn = 1;
+    String ceckNum = null;
     XSSFCellStyle rowStyle = null;
 
     public PoiUtils writeTab(Map<String, Object[]> data, Class clazz, String check, Map<String, ArrayList<String>> imageMap, String
@@ -117,14 +118,47 @@ public class PoiUtils {
             CTChart ctChart = xssfChart.getCTChart();
             CTPlotArea plotArea = ctChart.getPlotArea();
             CTLineSer[] serArray = plotArea.getLineChartArray(0).getSerArray();
-            // todo Android use this method can throw excetion
+            if (ceckNum == null) {
+                // todo Android use this method can throw excetion
 //            List<CTLineSer> serList = lineChartArray.getSerList();
+                String checkLeft = serArray[0].getVal().getNumRef().getF();
+                Log.e("tag", "第一列列数区间为 " + checkLeft);
+                String[] split = checkLeft.split("!\\$");
+                // 获取第二个
+                String[] split1 = split[1].split("\\$");
+                Log.e("tag", "split1 = " + split1[0] + ",split1 = " + split1[1]);
+                // 获取单元格的内容
+                String current = split1[0] + split1[1];
+                XSSFRow row2 = sheet.getRow(parseInt(split1[1]) - 1);
+                String currentCellNmae = split1[0];
+                if (currentCellNmae.length() == 1) {
+                    char[] chars = currentCellNmae.toCharArray();
+                    // 获取当当前的cell
+                    XSSFCell cell = row2.getCell(chars[0] - 65);
+                    String rawValue = cell.getStringCellValue();
+                    // 判断内容
+                    Matcher ma = Pattern.compile(Constants.NEW_POI_KEY_REGEXP).matcher(rawValue);
+                    if (ma.find()) {
+                        String group = Objects.requireNonNull(ma.group(1)).trim();
+                        // 进行设置
+                        // todo 使用 student + s 的方式傻瓜式添加
+                        Object[] objects = data.get(group + "s");
+                        if ((int) objects[0] == 1) {
+                            ArrayList lists = (ArrayList) objects[1];
+                            ceckNum = checkLeft + ":$" + chars[0] + "$" + (lists.size() + parseInt(split1[1]) - 1);
+                            serArray[0].getVal().getNumRef().setF(ceckNum);
+                        }
 
-            String f = serArray[0].getVal().getNumRef().getF();
-            Log.e("tag", "第一列列数区间为 " + f);
-            // 获取行数区间
-            String val = serArray[0].getCat().getNumRef().getF();
-            Log.e("tag", "formatCode " + val);
+                    }
+                }
+            } else {
+                serArray[0].getVal().getNumRef().setF(ceckNum);
+            }
+
+
+//            // 获取行数区间
+//            String val = serArray[0].getCat().getNumRef().getF();
+//            Log.e("tag", "formatCode " + val);
 
 
 //            //sheet1表示操作的sheet
