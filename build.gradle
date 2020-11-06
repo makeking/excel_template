@@ -1,33 +1,28 @@
-group 'com.github.deividasstr'
-version '0.3'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-apply plugin: 'java-library'
-apply plugin: 'maven'
+buildscript {
+    repositories {
+        jcenter()
+        google()
+//        maven { url 'https://jitpack.io' }
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.0.1"
+//        classpath 'com.android.tools.build:gradle:2.2.2'
 
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
 }
 
-dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-    testImplementation 'org.powermock:powermock-core:2.0.0-beta.5'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
+allprojects {
+    repositories {
+        jcenter()
+        google()
+//        maven { url 'https://jitpack.io' }
+    }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
