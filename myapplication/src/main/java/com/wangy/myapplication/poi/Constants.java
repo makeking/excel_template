@@ -9,7 +9,7 @@ public class Constants {
 	public static final String NEW_POI_KEY_REGEXP = "\\$\\{(\\w+)\\.(\\w+)\\}";
 	// 处理图片
 	public static final String POI_IMG_KEY_REGEXP = "\\$\\((\\w+).(\\w+)\\)";
-	public static final String NEW_POI_CHART = "<poi:foreach\\s+type=\"(\\w+)\"\\s+list=\"(\\w+)\"\\s+row=\"(\\w+)\"\\s+cell=\"(\\w+)\">";
+//	public static final String NEW_POI_CHART = "<poi:foreach\\s+type=\"(\\w+)\"\\s+list=\"(\\w+)\"\\s+row=\"(\\w+)\"\\s+cell=\"(\\w+)\">";
 //	public static final String NEWs_POI_FOREACH_START_REGEXP = "<poi:foreach\\s+type=\"(\\w+)\">";
 //	public static final String POI_FOREACH_START_REGEXP = "<poi:foreach\\s+list=\"(\\w+)\">";
 //	public static final String POI_FOREACH_END_REGEXP = "</poi:foreach>";

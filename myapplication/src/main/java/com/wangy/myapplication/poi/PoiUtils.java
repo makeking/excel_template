@@ -6,34 +6,21 @@ import android.util.Log;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.charts.AxisCrosses;
-import org.apache.poi.ss.usermodel.charts.AxisPosition;
-import org.apache.poi.ss.usermodel.charts.ChartDataSource;
-import org.apache.poi.ss.usermodel.charts.DataSources;
-import org.apache.poi.ss.usermodel.charts.LegendPosition;
-import org.apache.poi.ss.usermodel.charts.LineChartData;
-import org.apache.poi.ss.usermodel.charts.LineChartSeries;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xssf.usermodel.charts.XSSFCategoryAxis;
-import org.apache.poi.xssf.usermodel.charts.XSSFChartAxis;
-import org.apache.poi.xssf.usermodel.charts.XSSFChartLegend;
-import org.apache.poi.xssf.usermodel.charts.XSSFValueAxis;
-import org.apache.xmlbeans.XmlString;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTLineChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTLineSer;
-import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumDataSource;
-import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumRef;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTSerTx;
+import org.w3c.dom.Node;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -90,6 +77,7 @@ public class PoiUtils {
     int mergeRow = 1;
     int mergeColumn = 1;
     String ceckNum = null;
+    String ceckxNum = null;
     XSSFCellStyle rowStyle = null;
 
     public PoiUtils writeTab(Map<String, Object[]> data, Class clazz, String check, Map<String, ArrayList<String>> imageMap, String
@@ -111,94 +99,58 @@ public class PoiUtils {
             int lastRowNum = sheet.getLastRowNum();
             Log.e("tag", "lastRowNum " + lastRowNum);
             // 1. 获取所有的折线图
+            // 获取画板
             XSSFDrawing drawingPatriarch = sheet.getDrawingPatriarch();
+            // 获取图表的集合
             List<XSSFChart> charts = drawingPatriarch.getCharts();
-            // todo 先模拟第一个折线图
+            // 获取第一个图表
             XSSFChart xssfChart = charts.get(0);
+            //获取ct 图
             CTChart ctChart = xssfChart.getCTChart();
+            // 获取绘图区域的位置，大小，背景颜色，边缘颜色和网格颜色。
             CTPlotArea plotArea = ctChart.getPlotArea();
-            CTLineSer[] serArray = plotArea.getLineChartArray(0).getSerArray();
+            // 获取当前区域的折线图
+            CTLineChart lineChartArray = plotArea.getLineChartArray(0);
+            //获取折线图系列
+            CTLineSer[] serArray = lineChartArray.getSerArray();
+//            CTUnsignedInt axIdArray = lineChartArray.getAxIdArray(0);
+            CTLineSer ctLineSer = serArray[0];
+//            CTLineSer newctLineSer = serArray[1];
+//            newctLineSer.getVal();
             if (ceckNum == null) {
-                // todo Android use this method can throw excetion
-//            List<CTLineSer> serList = lineChartArray.getSerList();
-                String checkLeft = serArray[0].getVal().getNumRef().getF();
-                Log.e("tag", "第一列列数区间为 " + checkLeft);
-                String[] split = checkLeft.split("!\\$");
-                // 获取第二个
-                String[] split1 = split[1].split("\\$");
-                Log.e("tag", "split1 = " + split1[0] + ",split1 = " + split1[1]);
-                // 获取单元格的内容
-                String current = split1[0] + split1[1];
-                XSSFRow row2 = sheet.getRow(parseInt(split1[1]) - 1);
-                String currentCellNmae = split1[0];
-                if (currentCellNmae.length() == 1) {
-                    char[] chars = currentCellNmae.toCharArray();
-                    // 获取当当前的cell
-                    XSSFCell cell = row2.getCell(chars[0] - 65);
-                    String rawValue = cell.getStringCellValue();
-                    // 判断内容
-                    Matcher ma = Pattern.compile(Constants.NEW_POI_KEY_REGEXP).matcher(rawValue);
-                    if (ma.find()) {
-                        String group = Objects.requireNonNull(ma.group(1)).trim();
-                        // 进行设置
-                        // todo 使用 student + s 的方式傻瓜式添加
-                        Object[] objects = data.get(group + "s");
-                        if ((int) objects[0] == 1) {
-                            ArrayList lists = (ArrayList) objects[1];
-                            ceckNum = checkLeft + ":$" + chars[0] + "$" + (lists.size() + parseInt(split1[1]) - 1);
-                            serArray[0].getVal().getNumRef().setF(ceckNum);
-                        }
+                // 折线图上的点
+//                CTMarker marker = ctLineSer.getMarker();
+                // 设置标题，格式为下
+//                ctLineSer.getCat().getNumRef().getF();
+                // 设置顶部的x轴
+                CTSerTx tx = ctLineSer.getTx();
+                Node domNode = tx.getDomNode();
+                String nodeName = domNode.getNodeName();
+                String nodeValue = domNode.getNodeValue();
+                String f = tx.getStrRef().getF();
+                Log.e("tag", "x的值为" + f);
+                // 设置
+//                CTShapeProperties spPr = ctLineSer.getSpPr();
+//                CTLineProperties ln = spPr.getLn();
 
-                    }
-                }
+//                ln.get
+//                STPenAlignment.Enum algn = ln.getAlgn();
+//                ln.get
+//                CTLineProperties ln = spPr.getLn();
+                // todo Android use this method can throw excetion
+//              String checkLeft = serArray[0].getVal().getNumRef().getF();
+                String checkLeft = ctLineSer.getVal().getNumRef().getF();
+                String checkBootom = ctLineSer.getTx().getStrRef().getF();
+                getDataNum(checkLeft, sheet, data, 0);
+                getDataNum(checkBootom, sheet, data, 1);
+                ctLineSer.getVal().getNumRef().setF(ceckNum);
+                ctLineSer.getTx().getStrRef().setF(ceckxNum);
+
             } else {
-                serArray[0].getVal().getNumRef().setF(ceckNum);
+                ctLineSer.getTx().getStrRef().setF(ceckxNum);
+                ctLineSer.getVal().getNumRef().setF(ceckNum);
             }
 
-
-//            // 获取行数区间
-//            String val = serArray[0].getCat().getNumRef().getF();
-//            Log.e("tag", "formatCode " + val);
-
-
-//            //sheet1表示操作的sheet
-//            XSSFDrawing drawingPatriarch = sheet1.getDrawingPatriarch();
-//            List<XSSFChart> charts = drawingPatriarch.getCharts();
-//            XSSFChart xssfChart = charts.get(0);
-//            CTChart ctChart = xssfChart.getCTChart();
-//            CTPlotArea plotArea = ctChart.getPlotArea();
-//            //dataRangeMaxValue 代表取值范围单元格行数最大值
-//            Integer dataRangeMaxValue = 9;
-//            List<CTRadarSer> serList = plotArea.getRadarChartArray(0).getSerList();
-//            //serList1.get(0).getVal().getNumRef().getF() -> 'TestChart1'!$E$4:$E$9
-//            //serList1.get(1).getVal().getNumRef().getF() -> 'TestChart1'!$F$4:$F$9
-//            //设置第一列取数区间
-//            serList.get(0).getVal().getNumRef().setF("'TestChart1'!$E$4:$E$" + dataRangeMaxValue);
-//            //设置第二列取数区间
-//            serList.get(1).getVal().getNumRef().setF("'TestChart1'!$F$4:$F$" + dataRangeMaxValue);
-//            //serList1.get(1).getCat().getNumRef().getF() -> 'TestChart1'!$D$7:$D$9
-//            //注意:如果是一列标题对应多列数据,serList中都必须设置以下取数区域
-//            //设置标题取数区间
-//            serList.get(0).getCat().getNumRef().setF("'TestChart1'!$D$4:$D$" + dataRangeMaxValue);
-//            serList.get(1).getCat().getNumRef().setF("'TestChart1'!$D$4:$D$" + dataRangeMaxValue);
-
-//            // 图表图例
-//            XSSFChartLegend legend = xssfChart.getOrCreateLegend();
-//            // 设置标题的位置
-//            legend.setPosition(LegendPosition.TOP);
-//            // 获取图表数据区域
-//
-//            List<? extends XSSFChartAxis> axis = xssfChart.getAxis();
-//            for (int j = 0; j < axis.size(); j++) {
-//                XSSFChartAxis xssfChartAxis = axis.get(j);
-//                // 最小值和最大值
-//                double minimum = xssfChartAxis.getMinimum();
-//                double maximum = xssfChartAxis.getMaximum();
-//                // 设置值
-//                AxisCrosses crosses = xssfChartAxis.getCrosses();
-//                Class<AxisCrosses> declaringClass = crosses.getDeclaringClass();
-//
-//            }
             if (check == null && imagss == null) {
                 lastRowNum1 = sheet.getLastRowNum();
             }
@@ -299,48 +251,6 @@ public class PoiUtils {
                     if (cell != null && cell.getCellComment() != null) {
                         String tag = cell.getCellComment().getString().toString();
                         Log.e("tag", "注解： 当前的行是" + j + " 当前的列是 " + k + "内容是" + tag);
-                        // 1. 先匹配是不是chart 类型
-//                        Matcher matchers = Pattern.compile(Constants.NEW_POI_FOREACH_START_REGEXP).matcher(tag);
-//                        if (matchers.find()) {
-//                            String newType = Objects.requireNonNull(matchers.group(1)).trim();
-//                            if ("chart".equals(newType)) {
-//                                // 设置数据
-//                                // 判断list
-//                                String dataLists = Objects.requireNonNull(matchers.group(2)).trim();
-//                                // 判断row
-//                                String rowName = Objects.requireNonNull(matchers.group(3)).trim();
-//                                // 判断 cell
-//                                String cellName = Objects.requireNonNull(matchers.group(4)).trim();
-//                                for (String key : data.keySet()) {
-//                                    if (dataLists.equals(key)) {
-//                                        // 获取数据
-//                                        Object[] dats = data.get(key);
-//                                        assert dats != null;
-//                                        int isList = (int) dats[0];
-//                                        if (0 == isList) {
-//                                        } else {
-//                                            // 表示传递过来的集合
-//                                            ArrayList list = (ArrayList) dats[1];
-//                                            Class clazzs = (Class) dats[2];
-//                                            Field[] fields = clazzs.getDeclaredFields();
-//                                            for (Field field : fields) {
-//                                                field.setAccessible(true); //设置属性为可访问
-//                                                String name = field.getName();//获取属性的名称
-//                                                if (rowName.equals(name)) {
-//                                                    // 设置行
-//
-//                                                } else if (cellName.equals(name)) {
-//                                                    // 设置列
-//
-//                                                }
-//                                                field.setAccessible(false);
-//
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
                         Matcher ma = Pattern.compile(Constants.NEW_POI_FOREACH_START_REGEXP).matcher(tag);
                         // todo 注意不可以使用 groupCount(),要不然会进行分组
                         if (ma.find()) {
@@ -400,6 +310,46 @@ public class PoiUtils {
             }
         }
         return this;
+    }
+
+    private String getDataNum(String checkLeft, XSSFSheet sheet, Map<String, Object[]> data, int type1) {
+        Log.e("tag", "第一列列数区间为 " + checkLeft);
+        String[] split = checkLeft.split("!\\$");
+        // 获取第二个
+        String[] split1 = split[1].split("\\$");
+        Log.e("tag", "split1 = " + split1[0] + ",split1 = " + split1[1]);
+        // 获取单元格的内容
+        XSSFRow row2 = sheet.getRow(parseInt(split1[1]) - 1);
+        String currentCellNmae = split1[0];
+        if (currentCellNmae.length() == 1) {
+            char[] chars = currentCellNmae.toCharArray();
+            // 获取当当前的cell
+            XSSFCell cell = row2.getCell(chars[0] - 65);
+            String rawValue = cell.getStringCellValue();
+            // 判断内容
+            Matcher ma = Pattern.compile(Constants.NEW_POI_KEY_REGEXP).matcher(rawValue);
+            if (ma.find()) {
+                String group = Objects.requireNonNull(ma.group(1)).trim();
+                // 进行设置
+                // todo 使用 student + s 的方式傻瓜式添加
+                Object[] objects = data.get(group + "s");
+                assert objects != null;
+                if ((int) objects[0] == 1) {
+                    ArrayList lists = (ArrayList) objects[1];
+                    if (type1 == 0) {
+                        ceckNum = checkLeft + ":$" + chars[0] + "$" + (lists.size() + parseInt(split1[1]) - 1);
+                        return ceckNum;
+                    } else if (type1 == 1) {
+                        ceckxNum = checkLeft + ":$" + chars[0] + "$" + (lists.size() + parseInt(split1[1]) - 1);
+                        return ceckxNum;
+                    }
+
+
+                }
+
+            }
+        }
+        return null;
     }
 
     private void newCheckData(Map<String, Object[]> data, Class clazz, String

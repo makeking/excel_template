@@ -79,6 +79,10 @@ public class PoiActivity extends AppCompatActivity {
         students.add(new Student("小红", 31, "男", 122, 45));
         students.add(new Student("小白", 18, "女", 162, 85));
         students.add(new Student("小黑", 14, "女", 172, 75));
+        students.add(new Student("小白", 18, "女", 162, 85));
+        students.add(new Student("小黑", 14, "女", 172, 75));
+        students.add(new Student("小明", 11, "男", 172, 85));
+        students.add(new Student("小李", 21, "女", 162, 85));
         return students;
     }
 
